@@ -13,6 +13,41 @@ struct CVPair
   uint8_t   Value;
 };
 
+const int RightPin = 5;
+const int LeftPin  = 6;
+const int Motor1Enable = LED_BUILTIN;
+const byte maxSpeed = 29;
+void move(uint8_t speed, bool direction)
+{
+  if(speed == 0)
+  {
+    analogWrite(LeftPin,255);
+    analogWrite(RightPin,255);
+    digitalWrite(Motor1Enable,1);
+    return;
+  }
+  if(speed == 1)
+  {
+    digitalWrite(Motor1Enable,0);
+    //idle is not supp
+    return;
+  }
+  uint16_t realspeed = speed *255 / maxSpeed;
+  if(direction)
+  {
+    analogWrite(LeftPin,realspeed);
+    analogWrite(RightPin,0);
+  }
+  else
+  {
+    analogWrite(LeftPin,0);
+    analogWrite(RightPin,realspeed);
+  }
+  Serial.println(realspeed);
+  digitalWrite(Motor1Enable,1);
+  return;
+}
+
 const byte            VER_MAJOR     =                2; // Major version in CV 7
 const byte            VER_MINOR     =                1; // Minor version in CV 112    
 const byte            DCC_PIN       =                2; // DCC input pin.
@@ -82,6 +117,7 @@ void notifyDccSpeed( uint16_t Addr, DCC_ADDR_TYPE AddrType, uint8_t Speed, DCC_D
     Serial.print(SpeedSteps,DEC);
     Serial.print(" Dir: ");
     Serial.println( (Dir == DCC_DIR_FWD) ? "Forward" : "Reverse" );
+    move(Speed,  Dir == DCC_DIR_FWD);
 
 };
 #endif // NOTIFY_DCC_SPEED
